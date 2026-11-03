@@ -158,7 +158,7 @@ caliper/
   grader.py   终态断言判分器
   agents.py   脚本化 agent（gold/talk_only/random/overstep）+ OpenAI 兼容 LLM agent
   judge.py    soft 层判分：核对「回复声称的」与「工具实际做的」是否一致
-  annotate.py Week 3 的标注工具：分层抽样、κ、混淆矩阵、误差校正
+  annotate.py 标注与校准工具：分层抽样、κ、混淆矩阵、误差校正
   analyze.py  结果分析：flaky 任务、judge 假阳代理指标、失败原因
   runner.py   rollout、确定性重放、pass@k / pass^k、bootstrap CI
   cli.py      命令行入口
@@ -319,7 +319,7 @@ python -m caliper.cli analyze --results out_ds_v2/results.jsonl   # 生成分析
 python tests/run_tests.py         # 40 项验收
 ```
 
-Week 3 的标注流程：
+标注与校准流程：
 
 ```bash
 python -m caliper.cli sample --n 150          # 分层抽样 → annotate.csv
@@ -399,14 +399,24 @@ python -m caliper.cli run --agents llm --k 4 \
 
 ---
 
-## 下一步
+## 结论
 
-已完成：环境 / 判分协议 / 50 条任务 / 双模型 × k=4 / 人工标注与 judge 校准。
+这个项目最终确立了三件事，每一条都有数据和对照支撑：
 
-还差（优先级从高到低）：
+**1. agent 的能力上限和可靠性是两回事。**
+`pass@4` 只差 2pp，`pass^4` 差 10pp，而且这个结论在两种判分口径下都成立。
+只报 `pass@k` 的榜单会系统性地掩盖这个差距。
 
-1. **换一个 judge 再测**——现在只能说"这个 judge 不行"，不能说"LLM judge 不行"
-2. **一页 writeup**——问题 / 方法 / 三个发现 / 局限，面试可直接发
-3. **结单率、违规率做成独立指标**已具备，但还没进报告图表
+**2. LLM judge 不校准就不能用。**
+两轮独立人工标注给出了同样的答案：FPR = 1.00、κ ≤ 0。
+更强的裁判模型判得更严，但和确定性判分的一致性仍然只有 κ = 0.043——
+它在用自己的标准判，不是逼近真值。TPR ≈ FPR 时，误差校正公式**在数学上不可识别**。
 
-详见 [ROADMAP.md](ROADMAP.md)。
+**3. 判分器本身必须被验证，而且要被人工反向校准。**
+人工标注抓出了 4 处判分缺陷，也让 2 条"看起来成功"的轨迹现了原形——
+**连人类标注者都会被流畅的谎言骗过**，所以真实的评测流程必须有双人标注。
+
+工程上交付：50 条任务、9 个工具、47 项验收测试、400 次 rollout、
+33 条人工标注、两张可重画的图，以及一次完整的"测量如何静默出错"的复盘。
+
+方法与取舍记录在 [DEVLOG.md](DEVLOG.md)，一页版在 [docs/writeup.md](docs/writeup.md)。
