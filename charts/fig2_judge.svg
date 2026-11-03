@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="330" viewBox="0 0 780 330">
+<rect width="780" height="330" fill="#ffffff"/>
+<text x="36" y="44" font-family="-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="19" font-weight="700" fill="#111827">LLM judge 的假阳率：两轮独立标注都是 1.00</text>
+<text x="36" y="68" font-family="-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="13" fill="#6b7280">FPR = 在人工判定「未完成」的样本上，judge 仍判「通过」的比例</text>
+<rect x="210" y="82" width="11" height="11" rx="2" fill="#ef4444"/>
+<text x="227" y="92" font-family="-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#4b5563">LLM judge</text>
+<rect x="310" y="82" width="11" height="11" rx="2" fill="#10b981"/>
+<text x="327" y="92" font-family="-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12" fill="#4b5563">hard 判分（终态断言）</text>
+<text x="194" y="145" font-family="-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12.5" fill="#374151" text-anchor="end">旧判分器 · 失败样本 n=13</text>
+<rect x="210" y="108" width="420.0" height="30" rx="4" fill="#ef4444"/>
+<text x="640.0" y="128" font-family="ui-monospace,Consolas,monospace" font-size="12.5" font-weight="700" fill="#b91c1c">FPR 1.00</text>
+<text x="756" y="128" font-family="ui-monospace,Consolas,monospace" font-size="11" fill="#9ca3af" text-anchor="end">κ +0.00</text>
+<rect x="210" y="144" width="3.0" height="30" rx="4" fill="#10b981"/>
+<text x="223.0" y="164" font-family="ui-monospace,Consolas,monospace" font-size="12.5" font-weight="700" fill="#047857">FPR 0.00</text>
+<text x="756" y="164" font-family="ui-monospace,Consolas,monospace" font-size="11" fill="#9ca3af" text-anchor="end">κ +0.00</text>
+<text x="194" y="239" font-family="-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="12.5" fill="#374151" text-anchor="end">v2 判分器 · 随机 n=20</text>
+<rect x="210" y="202" width="420.0" height="30" rx="4" fill="#ef4444"/>
+<text x="640.0" y="222" font-family="ui-monospace,Consolas,monospace" font-size="12.5" font-weight="700" fill="#b91c1c">FPR 1.00</text>
+<text x="756" y="222" font-family="ui-monospace,Consolas,monospace" font-size="11" fill="#9ca3af" text-anchor="end">κ -0.14</text>
+<rect x="210" y="238" width="3.0" height="30" rx="4" fill="#10b981"/>
+<text x="223.0" y="258" font-family="ui-monospace,Consolas,monospace" font-size="12.5" font-weight="700" fill="#047857">FPR 0.00</text>
+<text x="756" y="258" font-family="ui-monospace,Consolas,monospace" font-size="11" fill="#9ca3af" text-anchor="end">κ +0.83</text>
+<text x="36" y="314" font-family="-apple-system,'Segoe UI','Microsoft YaHei',sans-serif" font-size="11.5" fill="#9ca3af">judge 从不拒绝真正该拒绝的样本；且 TPR≈FPR 时，误差校正式不可识别（返回 nan）</text>
+</svg>

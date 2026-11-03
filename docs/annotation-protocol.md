@@ -1,6 +1,6 @@
 # 标注协议 v1
 
-> 用在 `agenteval sample` 导出的 `annotate.csv` 上。目标不是"打分"，是产出一个
+> 用在 `caliper sample` 导出的 `annotate.csv` 上。目标不是"打分"，是产出一个
 > **可以和 judge 逐条比对的真值**，所以每条只回答一个问题。
 
 ## 标注的是什么
@@ -78,7 +78,7 @@
 ## 标完之后
 
 ```bash
-python -m agenteval.cli agree --csv annotate.csv
+python -m caliper.cli agree --csv annotate.csv
 ```
 
 输出：κ、准确率、TPR、FPR（各带 Wilson 95% CI）、以及校正后的通过率。

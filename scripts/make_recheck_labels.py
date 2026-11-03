@@ -12,10 +12,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from agenteval.annotate import to_rows  # noqa: E402
-from agenteval.labeltool import write_bundle  # noqa: E402
-from agenteval.runner import load_results  # noqa: E402
-from agenteval.tasks import load_tasks  # noqa: E402
+from caliper.annotate import to_rows  # noqa: E402
+from caliper.labeltool import write_bundle  # noqa: E402
+from caliper.runner import load_results  # noqa: E402
+from caliper.tasks import load_tasks  # noqa: E402
 
 
 def main() -> int:

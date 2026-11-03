@@ -70,7 +70,7 @@ judge 的 TPR = FPR = 1.0、κ = 0，完全没有区分度。
 
 ### 3.1 人工标注（单人方案，已确认无人协助）
 
-- `python -m agenteval.cli sample --n 150` 分层抽样（hard 通过/失败 × 任务难度）
+- `python -m caliper.cli sample --n 150` 分层抽样（hard 通过/失败 × 任务难度）
   - 纯随机会抽不到 judge 假阳样本——它们集中在"看起来很像成功"的轨迹里
 - 一个人标，但**分两轮**：第一轮标完，隔 24 小时把顺序打乱再标 30 条，算 intra-rater 一致性
 - 标注协议写成 markdown 落盘：什么算"通过"、边界情况怎么判

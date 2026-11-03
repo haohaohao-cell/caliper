@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from agenteval.labeltool import write_bundle  # noqa: E402
+from caliper.labeltool import write_bundle  # noqa: E402
 
 
 def main() -> int:

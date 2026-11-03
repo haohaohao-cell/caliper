@@ -1,10 +1,15 @@
-# agent-eval：agent 任务判分协议与可靠性度量
+# Caliper
 
-> 不是"我搭了个 agent benchmark 跑了几个模型"，而是
-> ****我量化了 agent 评测里"判分环节"的假阳/假阴，以及判分误差如何污染最终指标**。**
+> **一把没校准的卡尺，量出来的每个数都精确到小数点后两位，但全错。**
 
-当前进度：**Week 1 完成 + 任务集扩到 50 条**（环境 / 任务集 / hard 判分协议 / 负例注入验收 / 确定性重放）。
-Week 2 起接入 soft judge 与混淆矩阵校准，见 [ROADMAP.md](ROADMAP.md)。
+这是一个 agent 评测项目，但它量的不是模型，是**评测本身**：
+判分器的假阳/假阴有多大、采样方差有多宽、LLM judge 的错判如何污染最终指标。
+
+名字取自卡尺——**量东西之前，得先校准尺子**。
+
+![模型对比](charts/fig1_passk.svg)
+
+当前状态：50 条任务 / 9 个工具 / 47 项验收测试 / 2 个模型 × k=4 / 33 条人工标注。
 
 ---
 
@@ -23,7 +28,7 @@ agent 榜单满天飞，但绝大多数只报一个成功率。成功率里至�
 
 ## 当前能跑出什么
 
-`python -m agenteval.cli run --k 3` 的真实输出（50 任务 × 3 次）：
+`python -m caliper.cli run --k 3` 的真实输出（50 任务 × 3 次）：
 
 | agent | pass@3 | pass^3 | 95% CI | 平均 SR | 违规率 | 平均步数 |
 |---|---|---|---|---|---|---|
@@ -32,7 +37,7 @@ agent 榜单满天飞，但绝大多数只报一个成功率。成功率里至�
 | random（随机调用） | 0.000 | 0.000 | [0.000, 0.000] | 0.000 | 0.94 | 4.0 |
 | overstep（越权硬来） | 0.000 | 0.000 | [0.000, 0.000] | 0.000 | 1.00 | 2.0 |
 
-`python -m agenteval.cli replay`：**600 条轨迹重放，判分不一致 0 条**。
+`python -m caliper.cli replay`：**600 条轨迹重放，判分不一致 0 条**。
 
 > 任务集从 12 条扩到 50 条后，`random` 的 pass^3 从 0.083 掉到 **0.000**——
 > 因为新增的窗口期、重复退货、合计阈值、过度升级四类约束，把"瞎操作碰巧对"的路全堵死了。
@@ -146,7 +151,7 @@ soft 的判分提示词刻意要求 judge **核对回复声称的操作是否真
 ## 目录结构
 
 ```
-agenteval/
+caliper/
   db.py       世界状态：SQLite 内存库 + 22 个订单种子 + 快照
   tools.py    8 个 mock 工具，内嵌策略强制与违规记录
   tasks.py    任务加载与静态校验（gold 动作、断言类型）
@@ -218,6 +223,8 @@ v4-pro 的另一项优势是**违规率 0.00**——它从不越权尝试。
 **① judge 不可用，而且这个结论非常稳。** 它在三个独立样本上（13 条 / 20 条 / 复核 4 条）
 的 FPR 分别是 1.0、1.0、1.0——**它从不拒绝真正该拒绝的样本**。
 TPR ≈ FPR 意味着校正式不可识别，返回 `nan` 是正确结果而不是 bug。
+
+![judge 假阳率](charts/fig2_judge.svg)
 
 **② hard 判分其实相当可靠（κ = 0.83），但偏保守。** 它唯一的假阴性来自一条
 **我从未告知模型**的规则：跨订单合计超过 ¥500 需要审批。系统提示里只写了"单笔超过 ¥500"，
@@ -305,19 +312,19 @@ TPR ≈ FPR 意味着校正式不可识别，返回 `nan` 是正确结果而不�
 只需要 numpy（无 scipy / 无 pytest）。
 
 ```bash
-python -m agenteval.cli check     # gold 满分自检
-python -m agenteval.cli run --k 3 # 跑负例注入套件
-python -m agenteval.cli replay    # 重放校验
-python -m agenteval.cli analyze --results out_ds_v2/results.jsonl   # 生成分析报告
+python -m caliper.cli check     # gold 满分自检
+python -m caliper.cli run --k 3 # 跑负例注入套件
+python -m caliper.cli replay    # 重放校验
+python -m caliper.cli analyze --results out_ds_v2/results.jsonl   # 生成分析报告
 python tests/run_tests.py         # 40 项验收
 ```
 
 Week 3 的标注流程：
 
 ```bash
-python -m agenteval.cli sample --n 150          # 分层抽样 → annotate.csv
+python -m caliper.cli sample --n 150          # 分层抽样 → annotate.csv
 # 手工填 human 列（1/0）
-python -m agenteval.cli agree --csv annotate.csv # κ / 混淆矩阵 / 校正后成功率
+python -m caliper.cli agree --csv annotate.csv # κ / 混淆矩阵 / 校正后成功率
 ```
 
 Windows 控制台如果中文乱码，先 `$env:PYTHONIOENCODING='utf-8'`。
@@ -329,19 +336,19 @@ Windows 控制台如果中文乱码，先 `$env:PYTHONIOENCODING='utf-8'`。
 
 ```bash
 # 1) 先花几毛钱验证连通性：跑 2 个任务，看协议和 tool_call 解析对不对
-python -m agenteval.cli smoke --model deepseek-chat --n 2
+python -m caliper.cli smoke --model deepseek-chat --n 2
 
 # 2) 通了再跑全量（--judge-model 可选，开启 soft 层判分）
 export LLM_BASE_URL=https://api.deepseek.com/v1
 export LLM_API_KEY=sk-xxx
 export LLM_MODEL=deepseek-chat
-python -m agenteval.cli run --agents llm --k 4 --judge-model deepseek-chat
+python -m caliper.cli run --agents llm --k 4 --judge-model deepseek-chat
 ```
 
 等价写法：
 
 ```bash
-python -m agenteval.cli run --agents llm --k 4 \
+python -m caliper.cli run --agents llm --k 4 \
   --model deepseek-chat \
   --base-url https://api.deepseek.com/v1 \
   --temperature 0.7

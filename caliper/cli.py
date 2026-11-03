@@ -1,10 +1,10 @@
 """CLI 入口。
 
-    python -m agenteval.cli check                          # gold 满分自检
-    python -m agenteval.cli run --k 3                      # 负例注入套件
-    python -m agenteval.cli replay                         # 确定性重放
-    python -m agenteval.cli smoke --model deepseek-chat --n 2   # 接模型前的连通性验证
-    python -m agenteval.cli run --agents llm --k 4 --model deepseek-chat
+    python -m caliper.cli check                          # gold 满分自检
+    python -m caliper.cli run --k 3                      # 负例注入套件
+    python -m caliper.cli replay                         # 确定性重放
+    python -m caliper.cli smoke --model deepseek-chat --n 2   # 接模型前的连通性验证
+    python -m caliper.cli run --agents llm --k 4 --model deepseek-chat
 """
 
 from __future__ import annotations
@@ -279,7 +279,7 @@ def cmd_sample(args: argparse.Namespace) -> int:
     for (passed, diff), cnt in sorted(c.items(), key=lambda x: (x[0][1], x[0][0])):
         print(f"  hard={'通过' if passed else '失败'}  难度={diff}: {cnt} 条")
     print(f"\n共 {len(picked)} 条 → {args.out}")
-    print("填 human 列（1/0），再跑：agenteval agree --csv <该文件>")
+    print("填 human 列（1/0），再跑：caliper agree --csv <该文件>")
     return 0
 
 
@@ -306,7 +306,7 @@ def cmd_labels(args: argparse.Namespace) -> int:
     print(f"  盲标 CSV {bundle['blind']}  ← 想用 Excel 就用这个（不含机器判定）")
     print(f"  密钥     {bundle['key']}    ← 别打开，事后合并用")
     print("\n标完导出 labels.csv 后：")
-    print(f"  python -m agenteval.cli agree --csv labels.csv --key {bundle['key'].name}")
+    print(f"  python -m caliper.cli agree --csv labels.csv --key {bundle['key'].name}")
     return 0
 
 
@@ -423,7 +423,7 @@ def cmd_rejudge(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     load_dotenv()
-    p = argparse.ArgumentParser(prog="agenteval")
+    p = argparse.ArgumentParser(prog="caliper")
     p.add_argument("--tasks", default=str(DEFAULT_TASKS))
     sub = p.add_subparsers(dest="cmd", required=True)
 

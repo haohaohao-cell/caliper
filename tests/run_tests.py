@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import numpy as np
 
-from agenteval.agents import (
+from caliper.agents import (
     LLMAgent,
     OverstepAgent,
     RandomAgent,
@@ -28,8 +28,8 @@ from agenteval.agents import (
     TalkOnlyAgent,
     gold_agent,
 )
-from agenteval.judge import LLMJudge, StubJudge, parse_verdict
-from agenteval.runner import (
+from caliper.judge import LLMJudge, StubJudge, parse_verdict
+from caliper.runner import (
     bootstrap_ci,
     load_results,
     pass_at_k,
@@ -38,7 +38,7 @@ from agenteval.runner import (
     run_rollout,
     summarize,
 )
-from agenteval.tasks import load_tasks
+from caliper.tasks import load_tasks
 from mock_llm_server import MockLLMServer
 
 TASKS = load_tasks(ROOT / "tasks" / "tasks_v0.jsonl")
@@ -409,7 +409,7 @@ def test_stable_seed_is_process_independent():
     内置 hash() 对 str 每进程加盐，曾导致 random agent 的 pass^3
     在两次运行里分别是 0.000 和 0.040 —— 这正是本项目要消灭的那类问题。
     """
-    from agenteval.agents import stable_seed
+    from caliper.agents import stable_seed
 
     assert stable_seed("T01") == 6765, "种子变了：是否误用了内置 hash()？"
     assert stable_seed("T02") == 1580
@@ -421,7 +421,7 @@ def test_stable_seed_is_process_independent():
 
 @test
 def test_wilson_interval_edges():
-    from agenteval.annotate import wilson
+    from caliper.annotate import wilson
 
     lo, hi = wilson(0, 10)
     assert lo == 0.0 and 0.2 < hi < 0.35, (lo, hi)
@@ -433,7 +433,7 @@ def test_wilson_interval_edges():
 
 @test
 def test_cohen_kappa_known_value():
-    from agenteval.annotate import cohen_kappa
+    from caliper.annotate import cohen_kappa
 
     # po = 0.75, pe = 0.5 → kappa = 0.5
     assert abs(cohen_kappa([True, True, False, False], [True, False, False, False]) - 0.5) < 1e-9
@@ -443,7 +443,7 @@ def test_cohen_kappa_known_value():
 @test
 def test_prevalence_correction_recovers_truth():
     """Week 3 的核心公式：用 TPR/FPR 把被 judge 污染的成功率反解回去。"""
-    from agenteval.annotate import prevalence_corrected
+    from caliper.annotate import prevalence_corrected
 
     p_true, tpr, fpr = 0.6, 0.9, 0.1
     p_obs = p_true * tpr + (1 - p_true) * fpr  # = 0.58，被高估了
@@ -454,7 +454,7 @@ def test_prevalence_correction_recovers_truth():
 @test
 def test_prevalence_correction_undefined_when_tpr_equals_fpr():
     """judge 完全无区分度时校正不可识别，必须返回 nan 而不是瞎给一个数。"""
-    from agenteval.annotate import prevalence_corrected
+    from caliper.annotate import prevalence_corrected
 
     assert prevalence_corrected(0.5, 0.5, 0.5) != prevalence_corrected(0.5, 0.5, 0.5)
 
@@ -462,7 +462,7 @@ def test_prevalence_correction_undefined_when_tpr_equals_fpr():
 @test
 def test_confusion_and_correction_end_to_end():
     """构造一个已知 TPR=0.9 / FPR=0.1 的 judge，看能否把参数估回来。"""
-    from agenteval.annotate import confusion, prevalence_corrected
+    from caliper.annotate import confusion, prevalence_corrected
 
     human = [True] * 100 + [False] * 100
     judge = [True] * 90 + [False] * 10 + [True] * 10 + [False] * 90
@@ -477,7 +477,7 @@ def test_confusion_and_correction_end_to_end():
 @test
 def test_stratified_sample_covers_strata():
     """分层抽样必须覆盖到「hard 失败」这一层，否则抽不到 judge 假阳。"""
-    from agenteval.annotate import stratified_sample
+    from caliper.annotate import stratified_sample
 
     class R:
         def __init__(self, tid, passed):
@@ -492,7 +492,7 @@ def test_stratified_sample_covers_strata():
 
 @test
 def test_parse_label_accepts_common_spellings():
-    from agenteval.annotate import parse_label
+    from caliper.annotate import parse_label
 
     for v in ["1", "y", "yes", "true", "是"]:
         assert parse_label(v) is True
@@ -505,7 +505,7 @@ def test_parse_label_accepts_common_spellings():
 @test
 def test_analyze_computes_judge_false_positive_proxy():
     """judge 假阳代理指标：hard 失败里 judge 仍判通过的比例。"""
-    from agenteval.analyze import analyze
+    from caliper.analyze import analyze
 
     class R:
         def __init__(self, tid, passed, soft, viol=None):
@@ -573,8 +573,8 @@ def test_label_bundle_is_blind():
     import csv as _csv
     import tempfile
 
-    from agenteval.annotate import to_rows
-    from agenteval.labeltool import write_bundle
+    from caliper.annotate import to_rows
+    from caliper.labeltool import write_bundle
 
     rows = [to_rows([run_rollout(BY_ID["T02"], TalkOnlyAgent())], BY_ID)[0]]
     with tempfile.TemporaryDirectory() as d:
@@ -594,7 +594,7 @@ def test_agree_merges_key_for_blind_labels():
     import csv as _csv
     import tempfile
 
-    from agenteval.annotate import load_csv, parse_label
+    from caliper.annotate import load_csv, parse_label
 
     with tempfile.TemporaryDirectory() as d:
         lab = Path(d) / "labels.csv"
